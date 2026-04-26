@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+  <head>
+    <link rel="stylesheet" href="leaflet.css" />
+    <script src="leaflet.js"></script>
+    <style>
+      #map {
+        height: 100vh;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+      const initLatlong = [37.867, -122.302];
+      const map = L.map("map").setView(initLatlong, 15);
+      L.tileLayer("http://localhost:8081/tiles/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+      }).addTo(map);
+
+      const marker = L.circleMarker(initLatlong, { radius: 10 }).addTo(map);
+      const track = L.polyline([], { color: "red", weight: 3 }).addTo(map);
+
+      const ws = new WebSocket("ws://pi-copter-4.local:8765");
+      ws.onmessage = (e) => {
+        const d = JSON.parse(e.data);
+        if (d.error) return;
+        const latlng = [d.lat, d.lon];
+        marker.setLatLng(latlng);
+        track.addLatLng(latlng);
+        map.panTo([d.lat, d.lon]);
+        console.log("Lat:", d.lat, "Long:", d.lon, "Time:", new Date());
+      };
+      ws.onclose = (e) => console.log("WebSocket closed:", e.code, e.reason);
+      ws.onerror = (e) => console.log("WebSocket error:", e);
+    </script>
+  </body>
+</html>
