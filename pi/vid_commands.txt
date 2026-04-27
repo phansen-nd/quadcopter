@@ -1,0 +1,4 @@
+sudo iw dev wlan0 set power_save off
+sudo systemctl disable --now bluetooth.service 
+rpicam-vid -t 0 --inline --width 640 --height 360 --framerate 20 --codec mjpeg --flush -o udp://192.168.68.115:5007 > /dev/null 2>&1
+
